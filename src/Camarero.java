@@ -11,7 +11,7 @@ public Camarero(String nombre){
 public String getNombre() {
         return nombre;
     }
-public void prepararCafe(){
+public void prepararCafe() throws InterruptedException {
 //ANUNCIAR COMIEZO PREPARANDO EL CAFE, THREAD.SLEEP
 System.out.println(nombre+ " empezó a preparar el café para "+ cliente.getnombre());
 int preparacion=(int)(Math.random()*2000)+1000;
