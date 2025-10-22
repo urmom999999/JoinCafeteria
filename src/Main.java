@@ -6,8 +6,8 @@ public class Main {
         Camarero c2 = new Camarero("c2");
         //Camarero c3 = new Camarero("c3");
         //Camarero c4 = new Camarero("c4");
-
         int tiempoEspera;
+
         Cliente[] ClientesArray={
                 new Cliente("Ramon",2500),
                 new Cliente("Juanjo",1000),

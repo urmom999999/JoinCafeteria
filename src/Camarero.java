@@ -13,13 +13,15 @@ public String getNombre() {
     }
 public void prepararCafe(){
 //ANUNCIAR COMIEZO PREPARANDO EL CAFE, THREAD.SLEEP
-System.out.println(nombre+ " empezó a preparar el café.");
-
+System.out.println(nombre+ " empezó a preparar el café para "+ cliente.getnombre());
+int preparacion=(int)(Math.random()*2000)+1000;
         //SI EL CLIENTE SE MARCHA DETENER EL PROCESO
+    Thread.sleep(preparacion);
         System.out.println(nombre+ " paró de preparar el café, el cliente se marchó");
 
+        cliente.servido(true);
         //ENTREGAR SI ESTA A TIEMPO
-        System.out.println(nombre+ " terminó de preparar el café!");
+        System.out.println(nombre+ " terminó de preparar el café, tardó "+ preparacion+ "!");
     }
     //thread.sleep
 
