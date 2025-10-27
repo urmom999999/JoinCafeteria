@@ -11,6 +11,7 @@ public Camarero(String nombre){
 public String getNombre() {
         return nombre;
     }
+
 public void prepararCafe() throws InterruptedException {
 //ANUNCIAR COMIEZO PREPARANDO EL CAFE, THREAD.SLEEP
 System.out.println(nombre+ " empezó a preparar el café para "+ cliente.getnombre());

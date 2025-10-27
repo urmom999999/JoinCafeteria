@@ -3,14 +3,15 @@ private String nombre;
 private int tiempoEspera;
 private long llegada;
 private boolean servido;
+private Cola cola;
     //Servido?
 //llegada?
 
-public Cliente(String nombre, int tiempoEspera){
+public Cliente(String nombre, int tiempoEspera,Cola cola){
     this.nombre=nombre;
     this.tiempoEspera=tiempoEspera;
-    this.llegada=System.currentTimeMillis();
     this.servido=false;
+    this.cola=cola;
 }
 public String getNombre(){
     return nombre;
@@ -34,6 +35,7 @@ public void run(){
 
     //ESPERAR DETERMINADO TIEMPO
     try {
+
         Thread.sleep(tiempoEspera);
         //IRSE SI SUPERA EL TIEPO Thread.sleep?
         if(!servido){System.out.println(nombre+ " esperó demasiado y se fue.");}
