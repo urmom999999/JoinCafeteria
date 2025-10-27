@@ -34,7 +34,7 @@ public static void siServido(){
 @Override
 public void run(){
     //ENTRAR, ANUNCIAR ENTRADA -----HORA-----
-    System.out.println(nombre+ " entró en la cafetería y pidió un café. Máximo de espera: "+ tiempoEspera);
+    System.out.println(nombre+ " entró en la cafetería y pidió un café. Máximo de espera: "+ tiempoEspera/1000+" segundos");
 
 
     //ESPERAR DETERMINADO TIEMPO
