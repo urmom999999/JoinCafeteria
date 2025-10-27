@@ -21,7 +21,7 @@ public class Main {
                 new Cliente("Manuela",random.nextInt(5000)+5000,cola),
                 new Cliente("Ana",random.nextInt(5000)+5000,cola)
         };
-
+Camarero.setClientes(ClientesArray);
         System.out.println("Comienzo!");
         c1.start();
         c2.start();

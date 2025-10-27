@@ -1,8 +1,8 @@
 public class Cliente extends Thread{
-private String nombre;
+private static String nombre;
 private int tiempoEspera;
 private long llegada;
-private boolean servido;
+private static boolean servido;
 private Cola cola;
     //Servido?
 //llegada?
@@ -13,9 +13,11 @@ public Cliente(String nombre, int tiempoEspera,Cola cola){
     this.servido=false;
     this.cola=cola;
 }
-public String getNombre(){
-    return nombre;
-}
+
+    public static String getnombre() {
+        return nombre;
+    }
+
 public int getTiempoEspera (){
     return tiempoEspera;
 }
@@ -25,7 +27,9 @@ public int getTiempoEspera (){
 public boolean getServido(){
     return servido;
 }
-
+public static void siServido(){
+        Cliente.servido=true;
+    }
 
 @Override
 public void run(){
