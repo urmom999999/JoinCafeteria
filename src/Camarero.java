@@ -26,7 +26,7 @@ private static Cliente[] ClientesArray;
         Thread.sleep(preparacion);
         System.out.println(nombre + " paró de preparar el café, el cliente se marchó");
 
-        Cliente.siServido();
+
         //ENTREGAR SI ESTA A TIEMPO
         System.out.println(nombre + " terminó de preparar el café, tardó " + preparacion + "!");
     }
@@ -36,21 +36,7 @@ private static Cliente[] ClientesArray;
     public void run() {
         System.out.println(nombre + " comenzó a trabajar.");
 
-        for (Cliente cliente : ClientesArray) {
-            try {
-                Thread.sleep((long) (Math.random()*10));
-                cliente.start();
-                cliente.join();
-                System.out.println("Terminado!");
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
 
-
-        }
-        while (trabajo) {
-
-        }
 
 
         System.out.println(nombre + " terminó de trabajar.");

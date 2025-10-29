@@ -4,50 +4,61 @@ private int tiempoEspera;
 private long llegada;
 private static boolean servido;
 private Cola cola;
+private Camarero[] camareros;
     //Servido?
 //llegada?
 
-public Cliente(String nombre, int tiempoEspera,Cola cola){
+public Cliente(String nombre, int tiempoEspera,Cola cola,Camarero[] camareros){
     this.nombre=nombre;
     this.tiempoEspera=tiempoEspera;
     this.servido=false;
     this.cola=cola;
+    this.camareros=camareros;
 }
 
     public static String getnombre() {
         return nombre;
     }
-
 public int getTiempoEspera (){
+
     return tiempoEspera;
 }
-
-
-
 public boolean getServido(){
     return servido;
 }
-public static void siServido(){
-        Cliente.servido=true;
+public void siServido(){
+        this.servido=servido;
+}
+//Para que el camarero no este checkeando cada pocos milisegundos por un nuevo cliente, el cliente activa el camarero
+    private void activarCamarero(){
+    for (Camarero camarero: camareros){
+        if(!camarero.estaTrabajando()){
+            camarero.activar();
+            System.out.println("El camarero"+nombre +" fue llamado por el cliente y empezó a trabajar");
+            break;
+        }
+
+    }
     }
 
 @Override
 public void run(){
     //ENTRAR, ANUNCIAR ENTRADA -----HORA-----
     System.out.println(nombre+ " entró en la cafetería y pidió un café. Máximo de espera: "+ tiempoEspera/1000+" segundos");
-
-
+//Si camarero no esta trabajando
+    if (cola.getClientesEnCola()==0) {
+        activarCamarero();
+    }
+    //Si esta trabajando añadir a la cola sin mas
+    cola.agregarCliente(this);
     //ESPERAR DETERMINADO TIEMPO
     try {
-
         Thread.sleep(tiempoEspera);
         //IRSE SI SUPERA EL TIEPO Thread.sleep?
         if(!servido){System.out.println(nombre+ " esperó demasiado y se fue.");}
     } catch (InterruptedException e) {
         System.out.println(nombre+ " murió");
     }
-
-
     //CONFIRMAR CAFE RECIVIDO?
     //System.out.println(nombre+ " recivió su café!.");
 
