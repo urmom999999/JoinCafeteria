@@ -1,0 +1,236 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx,float}
+\usepackage{hyperref}
+\usepackage{listings}
+\graphicspath{{imagenes/}}
+\title{Actividad 1.4 Join Cafetería}
+\author{Álvaro Del Valle Fernández}
+
+\begin{document}
+
+\maketitle
+
+\section{Introducción}
+En este documento hablaré sobre la estructura de mi proyecto de de Cafetería con Joins usando javafx, la idea es crear un proyecto en el cual dos camareros gestionen multiples clientes como threads, el elemento fundamental es el uso del Join en este ejercicio.\\
+    Este sistema crea una espera para sincronizar los hilos correctamente, en este ejercicio veremos como funciona junto a una interfaz grafica muy simple.
+\section{Requisitos Funcionales}
+\begin{itemize}
+    \item \textbf{RF-1:} Gestionar los clientes y camareros mediante hilos
+    \item \textbf{RF-2:} Crear algun tipo de cola para que los clientes esperen por orden
+    \item \textbf{RF-3:} Tiempo de espera de preparacion del café
+    \item \textbf{RF-4:} Establecer un limite de tiempo segun cada cliente
+    \item \textbf{RF-5:} Mostrar notificaciones de los distintos estados
+    \item \textbf{RF-7:} Usar joins para finalizar los hilos, siendo este el punto mas importante.
+\end{itemize}
+
+\section{Requisitos No Funcionales}
+\begin{itemize}
+    \item \textbf{RNF-1:} Evitar que un cliente no sea atendido por dos camareros al mismo tiempo
+    \item \textbf{RNF-2:} Evitar que los camareros esten revisando en bucle, consumiendo muchos recursos
+    \item \textbf{RNF-3:} Ajustar los tiempos de espera, entre tiempo de espera del cliente, pausas y preparacion para que no de errores
+    \item \textbf{RNF-4:} Gestion de errores
+\end{itemize}
+
+\section{Historias de Usuario}
+\begin{itemize}
+    \item \textbf{HU-1:} Debo poder obtener un café en menos del tiempo que crea que sea excesivo.
+    \item \textbf{HU-2:} Debo poder marcharme si tengo muy poca paciencia
+    \item \textbf{HU-3:} Siendo Camarero, debe de ser el cliente el que me haga el pedido, no estare pendiente si hay clientes o no
+    \item \textbf{HU-4:} Siendo Camarero atenderé al siguiente en la lista, no al que pretenda esperar menos.
+\end{itemize}
+
+    \section{Arquitectura}
+Dentro de este ejercicio tenemos varios elementos, un Cliente, Camarero y la Cola. El cliente y el camarero con threads y la cola es un elemento .java separado para administrar la cola de clientes.\\
+Existen formas mas sencillas de administrar la cola como por ejemplo añadirlo al Camarero.java pero fue la forma mas clara de realizar el ejercicio.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=4in]{imagen0.png}
+\end{figure}
+Un elemento muy importante es que trate de que el cliente sea el que llama al camarero, intentando reducir el consumo de recursos al dejar al Camarero revisando cada milisegundo por un nuevo cliente.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=4in]{imagen1.png}
+\end{figure}
+
+\section{Clases Principales}
+
+\subsection{Clase Main}
+Main.class contiene los archivos fundamentales para inicar la aplicación y ejecutar cada uno de los módulos.
+
+\begin{lstlisting}
+    public class Main extends Application {
+    public Main() {
+    }
+
+    public void start(Stage primaryStage) throws Exception {
+        Parent root = (Parent)FXMLLoader.load(this.getClass().getResource("main.fxml"));
+        Scene scene = new Scene(root, (double)720.0F, (double)480.0F);
+        scene.getStylesheets().add(this.getClass().getResource("mainCSS.css").toExternalForm());
+        primaryStage.setResizable(false);
+        primaryStage.setTitle("CafeteriaFX");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+}
+\end{lstlisting}
+
+\subsection{Menu Controller}
+Esta se encarga de mapear las funciones de todos los elementos del javaFX, incluido el boton que da comienzo a la simulación
+\begin{lstlisting}
+    public class MenuController {
+    @FXML
+    private Text colaClientesText;
+    @FXML
+    private Text estadoCamarerosText;
+    @FXML
+    private TextArea estadoCafeteriaText;
+    @FXML
+    private Button comenzarButton;
+    private boolean simulacionEnCurso = false;
+
+    public MenuController() {
+    }
+
+    @FXML
+    public void initialize() {
+        this.estadoCafeteriaText.setEditable(false);
+        this.estadoCafeteriaText.setWrapText(true);
+        this.comenzarButton.setOnAction((event) -> this.comenzarSimulacion());
+    }
+
+    private void comenzarSimulacion() {
+        if (!this.simulacionEnCurso) {
+            this.simulacionEnCurso = true;
+            this.comenzarButton.setDisable(true);
+            this.colaClientesText.setText("");
+            this.estadoCamarerosText.setText("");
+            this.estadoCafeteriaText.setText("");
+            Thread simulacionThread = new Thread(() -> {
+                this.ejecutarSimulacionCompleta();
+                Platform.runLater(() -> {
+                    this.comenzarButton.setDisable(false);
+                    this.simulacionEnCurso = false;
+                });
+            });
+            simulacionThread.start();
+        }
+    }
+\end{lstlisting}
+Tras ello cree una función "ejecutarSimulacionCompleta" que se encarga de todos los elementos fundamentales, añadir  los clientes y camareros,
+iniciar estos y esperar a que terminen con un join()
+\begin{lstlisting}
+    private void ejecutarSimulacionCompleta() {
+        Cola cola = new Cola();
+        Camarero c1 = new Camarero("Camarero 1", cola, this);
+        Camarero c2 = new Camarero("Camarero 2", cola, this);
+        Camarero[] camareros = new Camarero[]{c1, c2};
+        Random random = new Random();
+        Cliente[] clientes = new Cliente[]{new Cliente("Ramon", random.nextInt(3000) + 7000, cola, camareros, this), new Cliente("Juanjo", random.nextInt(3000) + 7000, cola, camareros, this), new Cliente("Pepe", random.nextInt(3000) + 5000, cola, camareros, this), new Cliente("Manuel", random.nextInt(3000) + 5000, cola, camareros, this), new Cliente("Ramona", random.nextInt(3000) + 5000, cola, camareros, this), new Cliente("Larry", random.nextInt(5000) + 10000, cola, camareros, this), new Cliente("Manuela", random.nextInt(2000) + 3000, cola, camareros, this), new Cliente("Ana", random.nextInt(2000) + 4000, cola, camareros, this)};
+        this.agregarMensajeCafeteria("Comienzo!");
+
+        for(int i = 0; i < clientes.length; ++i) {
+            clientes[i].start();
+
+            try {
+                Thread.sleep((long)(random.nextInt(400) + 100));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for(Cliente cliente : clientes) {
+            try {
+                cliente.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        this.agregarMensajeCafeteria("Todos los camareros terminaron! Fin");
+    }
+\end{lstlisting}
+Las siguientes funciones se encargan de actualizar los datos en los textarea de javaFX, como agregar clientes a la cola, eliminarlos, cambiar el estado del camarero y actualizar los mensajes del estado.\\
+Al estar trabajando con hilos usé "Platform.runLater" para adaptarse a javaFX, debido a que esta solo permite modificar los datos desde su hilo principal.
+\begin{lstlisting}
+    private void ejecutarSimulacionCompleta() {
+        Cola cola = new Cola();
+        Camarero c1 = new Camarero("Camarero 1", cola, this);
+        Camarero c2 = new Camarero("Camarero 2", cola, this);
+        Camarero[] camareros = new Camarero[]{c1, c2};
+        Random random = new Random();
+        Cliente[] clientes = new Cliente[]{new Cliente("Ramon", random.nextInt(3000) + 7000, cola, camareros, this),
+        new Cliente("Juanjo", random.nextInt(3000) + 7000, cola, camareros, this), new Cliente("Pepe", random.nextInt(3000) + 5000, cola, camareros, this),
+        new Cliente("Manuel", random.nextInt(3000) + 5000, cola, camareros, this), new Cliente("Ramona", random.nextInt(3000) + 5000, cola, camareros, this),
+        new Cliente("Larry", random.nextInt(5000) + 10000, cola, camareros, this), new Cliente("Manuela", random.nextInt(2000) + 3000, cola, camareros, this),
+        new Cliente("Ana", random.nextInt(2000) + 4000, cola, camareros, this)};
+        this.agregarMensajeCafeteria("Comienzo!");
+
+        for(int i = 0; i < clientes.length; ++i) {
+            clientes[i].start();
+
+            try {
+                Thread.sleep((long)(random.nextInt(400) + 100));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for(Cliente cliente : clientes) {
+            try {
+                cliente.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            Thread.sleep(2000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        this.agregarMensajeCafeteria("Todos los camareros terminaron! Fin");
+    }
+\end{lstlisting}
+
+\subsection{Camarero}
+Esta se centra en el camarero, ofreciendo todas los elemntos relaiconados con los procesos que tiene que realizar el hilo del camarero.
+Su funcion principal es "prepararCafe" la cual realiza todo el proceso una vez es activado por el cliente, siendo muy importantes todos los mensajes actualizando el estado de este.
+\begin{lstlisting} 
+\end{lstlisting}
+\subsection{Cliente}
+Cliente incluye todo lo relacionado con el, desde la creación de la class a la funcion de activarcamarero, 
+fundamental para optimizar el programa.\\
+Tambien incluye todas las opciones desde notiifcar la entrada y su tiempo de espera a recibir el café o irse antes de tiempo
+\subsection{Cola}
+Esta class fue creada para organizarme correctamente y crear un codigo algo mas limpio, se centra en las funciones de agregar cliente a la cola,seleccionar el siguiente cliente en la cola,
+revisar si hay clientes en cola y contar el numero de clientes en ella.
+
+\section{Casos de uso}
+\subsection{Desde el punto del Cliente al Camarero}
+El cliente entra en la cafetería y tiene un tiempo limite, este revisa el estado del camarero, si esta ocupado el cliente se une a la cola, si el camarero esta libre y no existe cola notifica al camarero.\\
+Una vez que termine la cola y se le asigne el cliente al camarero, este realizará el pedido en un tiempo breve pero aleatorio.
+Si pasa demasiado tiempo, incluso en la propia cola, el cliente se puede marchar, si el camarero esta preparando pero pasa demasiado tiempo, este se marcha sin mas.\\
+Cuando todos los clientes son servidos o se marcharon, los camareros terminan de trabajar.
+
+\subsection{Desde el punto del usuario final del programa}
+El usuario simplemente tiene que hacer click en el boton verde y ver los resultados a tiempo real, estos son con elementos aleatorios por lo que cambian cada vez que le das al boton, este no puede ser pulsado de nuevo hasta que el proceso termine.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=4in]{imagen2.png}
+\end{figure}
+\section{Tecnologías usadas}
+Este proyecto fue realizado con Java, usando FXML,JavaFX para la interfaz gráfica principalmente para situar los elementos y tener una referencia visual. Use CSS debido a la cantidad de problemas que suelo tener con JavaFX, dandome cierto grado de seguridad y permitiendo usar fuentes de google mas interesantes, junto a imagenes de fondo.\\
+
+\end{document}
