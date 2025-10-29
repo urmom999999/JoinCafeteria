@@ -13,7 +13,7 @@ public class Cola{
 
     public void agregarCliente(Cliente cliente){
         clientesEsperando.add(cliente);
-        System.out.println(Cliente.getnombre()+" se unió a la cola de espera");
+        System.out.println(cliente.getnombre()+" se unió a la cola de espera");
 
     };
 public Cliente siguienteCliente(){

@@ -1,10 +1,11 @@
 public class Cliente extends Thread{
-private static String nombre;
+private String nombre;
 private int tiempoEspera;
 private long llegada;
-private static boolean servido;
+private boolean servido;
 private Cola cola;
 private Camarero[] camareros;
+
     //Servido?
 //llegada?
 
@@ -16,11 +17,10 @@ public Cliente(String nombre, int tiempoEspera,Cola cola,Camarero[] camareros){
     this.camareros=camareros;
 }
 
-    public static String getnombre() {
+    public String getnombre() {
         return nombre;
     }
 public int getTiempoEspera (){
-
     return tiempoEspera;
 }
 public boolean getServido(){
@@ -29,12 +29,15 @@ public boolean getServido(){
 public void siServido(){
         this.servido=servido;
 }
+    public void servir() {
+        this.servido = true;
+    }
 //Para que el camarero no este checkeando cada pocos milisegundos por un nuevo cliente, el cliente activa el camarero
     private void activarCamarero(){
     for (Camarero camarero: camareros){
         if(!camarero.estaTrabajando()){
             camarero.activar();
-            System.out.println("El camarero"+nombre +" fue llamado por el cliente y empezó a trabajar");
+            System.out.println("El camarero "+ camarero.getNombre() +" fue llamado por el cliente "+nombre+ " y empezó a trabajar");
             break;
         }
 
@@ -55,7 +58,9 @@ public void run(){
     try {
         Thread.sleep(tiempoEspera);
         //IRSE SI SUPERA EL TIEPO Thread.sleep?
-        if(!servido){System.out.println(nombre+ " esperó demasiado y se fue.");}
+        if(servido){
+            System.out.println(nombre + " recibió su café.");
+        }else{System.out.println(nombre+ " esperó demasiado y se fue.");}
     } catch (InterruptedException e) {
         System.out.println(nombre+ " murió");
     }
